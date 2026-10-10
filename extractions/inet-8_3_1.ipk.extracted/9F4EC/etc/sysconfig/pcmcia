@@ -1,0 +1,5 @@
+PCMCIA=yes
+PCIC=m8xx_pcmcia
+PCIC_OPTS=
+CORE_OPTS=
+CARDMGR_OPTS=

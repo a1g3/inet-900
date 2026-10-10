@@ -1,0 +1,94 @@
+# etc/wlan/shared
+#
+# Copyright (C) 1999 AbsoluteValue Systems, Inc.  All Rights Reserved.
+# --------------------------------------------------------------------
+#
+# linux-wlan
+#
+#   The contents of this file are subject to the Mozilla Public
+#   License Version 1.1 (the "License"); you may not use this file
+#   except in compliance with the License. You may obtain a copy of
+#   the License at http://www.mozilla.org/MPL/
+#
+#   Software distributed under the License is distributed on an "AS
+#   IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+#   implied. See the License for the specific language governing
+#   rights and limitations under the License.
+#
+#   Alternatively, the contents of this file may be used under the
+#   terms of the GNU Public License version 2 (the "GPL"), in which
+#   case the provisions of the GPL are applicable instead of the
+#   above.  If you wish to allow the use of your version of this file
+#   only under the terms of the GPL and not to allow others to use
+#   your version of this file under the MPL, indicate your decision
+#   by deleting the provisions above and replace them with the notice
+#   and other provisions required by the GPL.  If you do not delete
+#   the provisions above, a recipient may use your version of this
+#   file under either the MPL or the GPL.
+#
+# --------------------------------------------------------------------
+#
+# Inquiries regarding the linux-wlan Open Source project can be
+# made directly to:
+#
+# AbsoluteValue Systems Inc.
+# info@linux-wlan.com
+# http://www.linux-wlan.com
+#
+# --------------------------------------------------------------------
+#
+# Portions of the development of this software were funded by 
+# Intersil Corporation as part of PRISM(R) chipset product development.
+#
+# --------------------------------------------------------------------
+
+wlan_set_ssid_schemefile ()
+{
+	# Find the scheme file 
+	if [ -d /var/state/pcmcia ] ; then
+		WLAN_SCHEMEFILE="/var/state/pcmcia/scheme"
+	elif [ -d /var/lib/pcmcia ] ; then
+        	WLAN_SCHEMEFILE="/var/lib/pcmcia/scheme"
+	else
+		WLAN_SCHEMEFILE="/var/run/pcmcia-scheme"
+	fi
+
+	# Collect the current scheme name and save the file
+	if [ -r $WLAN_SCHEMEFILE ] ; then
+		WLAN_SCHEME=`cat $WLAN_SCHEMEFILE`
+		cp $WLAN_SCHEMEFILE /tmp/wlan_scheme_`date +"%T"`.tmp
+	else
+		touch /tmp/wlan_scheme_`date +"%T"`.tmp
+		
+	fi
+
+	# Set up the <scheme:SSID> string
+	if [ ! "$WLAN_SCHEME" ] ; then 
+		WLAN_SCHEME="default"
+	fi
+	WLAN_SCHEME="$WLAN_SCHEME:$1"
+
+	# Write to schemefile
+	echo $WLAN_SCHEME > $WLAN_SCHEMEFILE
+}
+
+wlan_restore_schemefile ()
+{
+	# Find the scheme file 
+	if [ -d /var/state/pcmcia ] ; then
+		WLAN_SCHEMEFILE="/var/state/pcmcia/scheme"
+	elif [ -d /var/lib/pcmcia ] ; then
+        	WLAN_SCHEMEFILE="/var/lib/pcmcia/scheme"
+	else
+		WLAN_SCHEMEFILE="/var/run/pcmcia-scheme"
+	fi
+
+	TMPFILE=`ls /tmp/wlan_scheme*.tmp | tail -n 1`
+
+	if [ -r $TMPFILE ] ; then
+		cat $TMPFILE > $WLAN_SCHEMEFILE
+		rm -f $TMPFILE
+	else
+		echo "wlan_restore_schemefile: No wlan_scheme\*.tmp file found."
+	fi
+}

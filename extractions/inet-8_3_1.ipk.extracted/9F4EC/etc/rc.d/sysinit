@@ -1,0 +1,18 @@
+#!/bin/sh
+
+mount -t proc proc /proc
+mount -a
+mkdir -p /tmp/var
+mkdir -p /var/certs
+mkdir -p /var/log
+mkdir -p /var/local
+mkdir -p /var/lock
+mkdir -p /var/run
+mkdir -p /var/webs
+mkdir -p /var/state/dhcp
+mkdir -p /tmp/etc/dhcpc
+depmod -q
+echo "600" > /proc/sys/net/ipv4/tcp_keepalive_time
+echo " " > /var/state/udhcpd.leases
+ifconfig lo 127.0.0.1 netmask 255.0.0.0 broadcast 127.255.255.255
+route add -net 127.0.0.0 netmask 255.0.0.0 lo

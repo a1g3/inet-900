@@ -1,0 +1,132 @@
+#! /bin/sh 
+# Wireless LAN adapter configuration
+#
+# etc/pcmcia/wlan-ng.opts
+#
+# Copyright (C) 1999 AbsoluteValue Systems, Inc.  All Rights Reserved.
+# --------------------------------------------------------------------
+#
+# linux-wlan
+#
+#   The contents of this file are subject to the Mozilla Public
+#   License Version 1.1 (the "License"); you may not use this file
+#   except in compliance with the License. You may obtain a copy of
+#   the License at http://www.mozilla.org/MPL/
+#
+#   Software distributed under the License is distributed on an "AS
+#   IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+#   implied. See the License for the specific language governing
+#   rights and limitations under the License.
+#
+#   Alternatively, the contents of this file may be used under the
+#   terms of the GNU Public License version 2 (the "GPL"), in which
+#   case the provisions of the GPL are applicable instead of the
+#   above.  If you wish to allow the use of your version of this file
+#   only under the terms of the GPL and not to allow others to use
+#   your version of this file under the MPL, indicate your decision
+#   by deleting the provisions above and replace them with the notice
+#   and other provisions required by the GPL.  If you do not delete
+#   the provisions above, a recipient may use your version of this
+#   file under either the MPL or the GPL.
+#
+# --------------------------------------------------------------------
+#
+# Inquiries regarding the linux-wlan Open Source project can be
+# made directly to:
+#
+# AbsoluteValue Systems Inc.
+# info@linux-wlan.com
+# http://www.linux-wlan.com
+#
+# --------------------------------------------------------------------
+#
+# Portions of the development of this software were funded by 
+# Intersil Corporation as part of PRISM(R) chipset product development.
+#
+# --------------------------------------------------------------------
+#
+# The address format is "scheme,socket,instance,hwaddr".
+#
+# --------------------------------------------------------------------
+
+case "$ADDRESS" in
+*,*,*,*)
+	#=======ENABLE========================================
+	# Do we want to enable the card at all?  Set to 'n' if you don't
+	# want the card initialized for normal operation.  Helpful for
+	# (re)loading flash or for test purposes.
+	WLAN_ENABLE=y
+	
+	#=======USER MIB SETTINGS=============================
+	# You can add the assignments for various MIB items
+	#  of your choosing to this variable, separated by 
+	#  whitespace.  The wlan-ng script will then set each one.
+	# Just uncomment the variable and set the assignments 
+	#  the way you want them.
+
+	#USER_MIBS="\
+	#p2RoamingMode=2"
+	#p2MMTx=true \
+	#p2MMFixedLevel=2"
+
+	#=======WEP===========================================
+	# [Dis/En]able WEP.  Settings only matter if PrivacyInvoked is true
+	dot11PrivacyInvoked=false 	# true|false
+	dot11WEPDefaultKeyID=1		# 0|1|2|3
+	dot11ExcludeUnencrypted=false  # true|false, in AP this means WEP 
+	                                #  is required for all STAs
+	# Use the generator string to generate keys (just a convenience)
+	#PRIV_GENERATOR=/sbin/nwepgen	# nwepgen, Neesus compatible
+	#PRIV_GENSTR="12345"
+	# or set them explicitly.  Set genstr or keys, not both.
+	dot11WEPDefaultKey0=01:02:03:04:05		# format: xx:xx:xx:xx:xx
+	dot11WEPDefaultKey1=11:12:13:14:15		#  e.g.  01:20:03:40:05
+	dot11WEPDefaultKey2=21:22:23:24:25
+	dot11WEPDefaultKey3=31:32:33:34:35
+
+	#=======STA START=====================================
+	# SSID is all we have for now
+	dot11DesiredSSID="tqm-wlan"
+
+	#=======DOWNLOAD======================================
+	# Do we need to download code/data to the card?
+	WLAN_DOWNLOAD=n
+	WLAN_DOWNLOADER=/sbin/prism2dl
+	WLAN_DLIMAGE=/etc/pcmcia/t10002c5.hex
+
+	#=======AP START======================================
+	# If IS_AP is 'y', then the following settings will be
+	# used in the creation of a BSS with this station acting
+	# as the AP.  If IS_AP is 'n', these settings are ignored.
+	IS_AP=y				# y|n
+	IS_BRIDGE=n			# Are we a bridging AP?
+	IS_OLDBRIDGE=n			# Which kernel bridge code are we using?
+	APWIREDDEVICE=eth0		# Must be an ethernet device
+	APBRIDGEDEVICE=apbr0		# Bridge interface name
+	AP_IPADDR=10.2.142.143   	# Bridge IP address (and only bridge)
+	AP_NETMASK=255.255.0.0   	# Bridge IP netmask
+	AP_BROADCAST=10.2.255.255   	# Bridge IP broadcast address 
+	APSSID="tqm-wlan"		# SSID the AP will use, max 32 chars
+	APBCNINT=100			# Beacon interval (in Kus)
+	APDTIMINT=3			# DTIM interval (in beacons)
+	APCFPOLLABLE=false		# AP's CFP support (see table below)
+	APCFPOLLREQ=false		# AP's CFP support (see table below)
+	APCFPPERIOD=3			# CFP period, if CFP enabled(in beacons)
+	APCFPMAXDURATION=100		# CFP max length (in Kus)
+	APPROBEDELAY=100		# Not currently used
+	APCHANNEL=9			# DS channel for BSS (1-14, depends 
+					#   on regulatory domain)
+	#APBASICRATES="22"		# Rates for mgmt&ctl frames (in 500Kb/s)
+	APBASICRATES="2 4"		# Rates for mgmt&ctl frames (in 500Kb/s)
+	#APOPRATES="22"		# Supported rates in BSS (in 500Kb/s)
+	APOPRATES="2 4 11 22"		# Supported rates in BSS (in 500Kb/s)
+
+		# Table of CFPOLL* values:
+		# CFPOLLABLE CFPOLLREQ  AP Behavior
+		#----------------------------------------------------
+		# false       false     No Point Coordinator (CFP) at AP
+		# false       true      CFP for delivery only (no polling)
+		# true        false     CFP delivery and polling
+		# true        true      Reserved, do not use
+    ;;
+esac

@@ -1,0 +1,47 @@
+#!/bin/sh
+#
+# Run level 1 startup script
+#
+
+if [ $1 = "1" ]; then
+
+  echo Installing watchdog daemon...
+  wdkick
+  echo Loading drivers...
+	insmod /lib/modules/`uname -r`/misc/flash_drv.o
+	insmod /lib/modules/`uname -r`/misc/fpga_drv.o
+#	insmod /lib/modules/`uname -r`/misc/led_drv.o
+	echo Loading fpga...
+	fpga i 1
+	echo Initializing interprocess communications...
+	initipc
+	echo Initializing logging facilities...
+	log
+	echo Initializing persistant storage...
+	param
+	echo Configuring ethernet interface...
+	echo Starting network daemon...
+	/usr/sbin/inetd
+#	echo Bringing up wireless interface
+#	insmod /lib/modules/`uname -r`/kernel/net/bridge/bridge.o
+#	insmod /lib/modules/`uname -r`/net/p80211.o
+#	/etc/rc.d/init.d/pcmcia start
+	echo Loading web server...
+	boa
+	echo iNET startup complete.
+	echo
+
+elif [ $1 = "6" ]; then
+
+	echo Bringing down web server...
+	killall boa
+	echo Bringing down wireless interface...
+	/etc/rc.d/init.d/pcmcia stop
+	echo Shutting down network services...
+	killall inetd
+
+	reboot -d -f -i
+
+fi
+
+exit 0

@@ -1,0 +1,6 @@
+# /etc/bashrc
+
+# System wide functions and aliases
+# Environment stuff goes in /etc/profile
+
+PS1="[\u@\h \W]\\$ "

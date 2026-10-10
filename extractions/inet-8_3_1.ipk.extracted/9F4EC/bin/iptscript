@@ -1,0 +1,42 @@
+#!/bin/sh
+#
+# netfilter/iptables config script
+#
+# $1 = mgmt interface name
+# $2 = mgmt ip
+# $3 = data interface name
+# $4 = data ip
+
+# clean any existing rules, policy will be ACCEPT by default
+iptables -F INPUT
+iptables -F FORWARD
+iptables -F OUTPUT
+
+# default INPUT, FORWARD, and OUTPUT policy to DROP
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT DROP
+
+# INPUT RULES
+# ================================================================================
+# drop packets coming in data interface destined for mgmt IP
+iptables -A INPUT -i $3 -d $2 -j DROP
+# drop packets coming in management interface destined for data IP
+iptables -A INPUT -i $1 -d $4 -j DROP
+# drop packets coming in data interface destined for well known server (mgmt) ports
+#   FTP,SSH,TELNET,TFTP,HTTP,NTP,SNMP,SNMP-TRAPS,HTTPS
+iptables -A INPUT -p tcp -i $3 -d $4 -m multiport --destination-port 21,22,23,69,80,123,161,162,443 -j DROP
+iptables -A INPUT -p udp -i $3 -d $4 -m multiport --destination-port 21,22,23,69,80,123,161,162,443 -j DROP
+# accept everything else
+iptables -A INPUT -j ACCEPT
+
+# OUTPUT RULES
+# ================================================================================
+# drop packets going out data interface destined for well known server (mgmt) ports
+#   FTP,SSH,TELNET,TFTP,HTTP,NTP,SNMP,SNMP-TRAPS,HTTPS
+iptables -A OUTPUT -p tcp -o $3 -s $4 -m multiport --destination-port 21,22,23,69,80,123,161,162,443 -j DROP
+iptables -A OUTPUT -p udp -o $3 -s $4 -m multiport --destination-port 21,22,23,69,80,123,161,162,443 -j DROP
+# accept everything else
+iptables -A OUTPUT -j ACCEPT
+
+exit 0

@@ -1,0 +1,8 @@
+alias tdbg='tail -f /var/log/dbglog'
+alias tmsg='tail -f /var/log/messages'
+alias cdbg='cat /var/log/dbglog'
+alias cmsg='cat /var/log/messages'
+alias cdbg1='cat /var/log/dbglog.1'
+alias cmsg1='cat /var/log/messages.1'
+alias mem='cat /proc/meminfo'
+alias slab='cat /proc/slabinfo'
